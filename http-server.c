@@ -60,7 +60,7 @@ void https_server() {
             printf("successfully connect socket %d!\n", fd);
             SSL_set_accept_state(ssl);
             SSL_set_fd(ssl, connect);
-            if (SSL_accept(ssl) == -1) printf("ssl error!\n")
+            if (SSL_accept(ssl) == -1) printf("ssl error!\n");
             /*
                 Receive and Parse Messages.
             */
@@ -73,7 +73,7 @@ int main () {
     pthread_t tid[2];
     pthread_create(&tid[0], NULL, (void *)http_server, NULL);
     pthread_create(&tid[1], NULL, (void *)https_server, NULL);
-    pthread_join(&tid[0], NULL);
-    pthread_join(&tid[1], NULL);
+    pthread_join(tid[0], NULL);
+    pthread_join(tid[1], NULL);
     return 0;
 }
