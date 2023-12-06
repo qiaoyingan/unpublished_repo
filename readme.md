@@ -1,0 +1,1 @@
+gcc http-server.c -o http-server -lssl -lcrypto -pthread
