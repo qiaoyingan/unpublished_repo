@@ -24,24 +24,24 @@ int init_socket(int port) {
     saddr.sin_port = htons(port);
     saddr.sin_addr.s_addr = INADDR_ANY;
     if (bind(fd, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) printf("bind error of %d!\n", fd);
-    if (listen(fd, 5) < 0) printf("listen error of socket %d\n!", fd);
-    printf("successfully init socket %d\n!", fd);
+    if (listen(fd, 5) < 0) printf("listen error of socket %d!\n", fd);
+    printf("successfully init socket %d!\n", fd);
     return fd;
 }
 
 void http_server() {
     int fd = init_socket(HTTP_PORT), connect = 0;
     while (1) {
-        connect = accept(fd, NULL, NULL);
-        if (connect == -1) continue;
+        if (connect = accept(fd, NULL, NULL) == -1) continue;
         else {
-            printf("successfully connect socket %d!\n", fd);
+            printf("successfully connect socket %d, %d!\n", fd, connect);
             /*
                 Receive and Parse Messages.
             */
         }
         close(connect);
     }
+    printf("close socket %d, %d!\n", fd, connect);
 }
 
 void https_server() {
@@ -55,9 +55,9 @@ void https_server() {
     SSL *ssl = SSL_new(ctx);
     while (1) {
         connect = accept(fd, NULL, NULL);
-        if (connect == -1) continue;
+        if (connect = accept(fd, NULL, NULL) == -1) continue;
         else {
-            printf("successfully connect socket %d!\n", fd);
+            printf("successfully connect socket %d, %d!\n", fd, connect);
             SSL_set_accept_state(ssl);
             SSL_set_fd(ssl, connect);
             if (SSL_accept(ssl) == -1) printf("ssl error!\n");
@@ -67,6 +67,7 @@ void https_server() {
         }
         close(connect);
     }
+    printf("close socket %d, %d!\n", fd, connect);
 }
 
 int main () {
