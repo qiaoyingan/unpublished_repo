@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <pthread.h>
+#include <threads.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <openssl/ssl.h>
@@ -131,9 +131,8 @@ void fun80()
 
             // response
             char response[2000] = "";
-            sprintf(response,"hello");
-            printf("send response\n");
-            send(connect, response, strlen(response), 0);
+            sprintf(response,"HTTP/1.1 301 Moved Permanently\r\nContent-Length: 0\r\nLocation: https://%s%s\r\n\r\n",req.host,req.path);
+            send(cfd80, response, strlen(response), 0);
         };
         close(cfd80);
     }
@@ -164,12 +163,111 @@ void fun443()
                 continue;
             }
 
+            // receive
             char request[2000];
             int request_len = SSL_read(ssl, request, 2000);
             request[request_len] = '\0';
             printf("\nrequest: (%d)\n", request_len);
             printf("%s", request);
-            char hdr[50] = "hello";
+
+            char buf_cpy[2000];
+            strncpy(buf_cpy,request,2000);
+            http_request_t req = parse_http_request(buf_cpy);
+
+            if(!strcmp(req.method, "GET")){
+                FILE* file;
+                if(req.path == "/"){
+                    strcpy(req.path,"/index.html");
+                }
+                file = fopen(req.path+1,"r");
+                // get content type
+                char content_type[20] = "text/html";
+                char filepath[128];
+                strcpy(filepath,req.path);
+                char *ptr;
+                char *saveptr;
+                ptr = strtok_r(filepath,".",&saveptr);
+                if(saveptr && strlen(saveptr)>0){
+                    if(strcmp(saveptr,"mp4")==0){
+                        strcpy(content_type,"video/mpeg");
+                    }
+                }
+                char hdr_content_type[30] = {};
+                sprintf(hdr_content_type,"Content-type: %s\r\n\r\n",content_type);
+                printf("hdr_content_type:%s",hdr_content_type);
+
+                // read file
+                if(file == NULL){
+                    // 404
+                    // fclose(file);
+                    printf("%s:file not find!\n",req.path);
+                    SSL_write(ssl, http_error_hdr, strlen(http_error_hdr));
+                }
+                else if (req.range_start != -1){
+                    // 206
+                    fseek(file,0,SEEK_END);
+                    long file_size = ftell(file);
+                    fseek(file,0,SEEK_SET);
+                    long range_end;
+                    if((file_size - 1 < req.range_end) || req.range_end==-1){
+                        range_end = file_size - 1;
+                    }
+                    else{
+                        range_end = req.range_end;
+                    }
+                    long content_length = range_end - req.range_start + 1;
+                    char hdr[500]; 
+                    char hdr_code[] = "HTTP/1.1 206 Partial Content\r\nAccept-Ranges: bytes\r\n";
+                    sprintf(hdr,"%sContent-Length: %ld\r\nContent-Range: bytes %ld-%ld/%ld\r\n%s"
+                    ,hdr_code,content_length,req.range_start,range_end,content_length,hdr_content_type);
+                    printf("\nsend hdr:%s\n",hdr);
+                    printf("=========\n");
+                    SSL_write(ssl, hdr, strlen(hdr));
+
+                    // get file length
+                    fseek(file,req.range_start,SEEK_SET);
+                    long pending_size = content_length;
+
+                    // send file
+                    char buf[FILE_BUF_SIZE];
+                    while (pending_size>0){
+                        long num;
+                        if(pending_size>=sizeof(buf)){
+                            num = fread(buf, 1, sizeof(buf)-1, file);
+                            pending_size -= (sizeof(buf)-1);
+                        }
+                        else{
+                            num = fread(buf, 1, pending_size, file);
+                            pending_size = 0;
+                        }
+                        SSL_write(ssl, buf, num);
+                    }   
+                }
+                else{
+                    // 200
+                    char buf[FILE_BUF_SIZE];
+                    char hdr_code[] = "HTTP/1.1 200 OK\r\n";
+                    char hdr[50] = "";
+                    sprintf(hdr,"%s%s",hdr_code,hdr_content_type);
+                    printf("\nresponse header:%s",hdr);
+                    printf("=============\n");
+                    SSL_write(ssl, hdr, strlen(hdr));
+
+                    // send file
+                    while (!feof(file)){
+                        long num = fread(buf, 1, sizeof(buf)-1, file);
+                        SSL_write(ssl, buf, num);
+                    }           
+                    fclose(file);
+                }
+            }
+            else{
+                printf("unsupported reques method\n");
+            }
+
+            // response
+            // char response[2000] = "HTTP/1.1 301 Moved Permanently\r\n";
+            // SSL_write(ssl, response, strlen(response));
             SSL_shutdown(ssl);
             SSL_free(ssl);
         };

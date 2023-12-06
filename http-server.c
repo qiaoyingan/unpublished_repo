@@ -12,7 +12,6 @@
 #include <openssl/err.h>
 #include <sys/msg.h>
 #include <sys/socket.h>
-#include <pthread.h>
 
 #define HTTP_PORT 80
 #define HTTPS_PORT 443
@@ -32,9 +31,12 @@ int init_socket(int port) {
 void http_server() {
     int fd = init_socket(HTTP_PORT), connect = 0;
     while (1) {
-        if (connect = accept(fd, NULL, NULL) == -1) continue;
+        if ((connect = accept(fd, NULL, NULL)) == -1) continue;
         else {
             printf("successfully connect socket %d, %d!\n", fd, connect);
+            /*
+                todo: Receive and Parse Messages.
+            */
             char request[2000];
             int request_len = recv(connect, request, 2000, 0);
             // request[request_len] = '\0';
@@ -66,7 +68,7 @@ void https_server() {
     SSL_CTX_use_PrivateKey_file(ctx, "keys/cnlab.prikey", SSL_FILETYPE_PEM);
 
     while (1) {
-        if (connect = accept(fd, NULL, NULL) == -1) continue;
+        if ((connect = accept(fd, NULL, NULL)) == -1) continue;
         else {
             printf("successfully connect socket %d, %d!\n", fd, connect);
             SSL *ssl = SSL_new(ctx);
@@ -74,7 +76,7 @@ void https_server() {
             SSL_set_fd(ssl, connect);
             if (SSL_accept(ssl) == -1) printf("ssl error!\n");
             /*
-                Receive and Parse Messages.
+                todo: Receive and Parse Messages.
             */
             char request[2000];
             int request_len = SSL_read(ssl, request, 2000);
@@ -92,12 +94,10 @@ void https_server() {
 }
 
 int main () {
-    signal(SIGPIPE, SIG_IGN);
     pthread_t tid[2];
     pthread_create(&tid[0], NULL, (void *)http_server, NULL);
     pthread_create(&tid[1], NULL, (void *)https_server, NULL);
-    while (1) {
-
-    }
+    pthread_join(tid[0], NULL);
+    pthread_join(tid[1], NULL);
     return 0;
 }
