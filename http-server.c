@@ -63,18 +63,28 @@ void https_server() {
     SSL_CTX *ctx = SSL_CTX_new(SSLv23_server_method());
     SSL_CTX_use_certificate_file(ctx, "keys/cnlab.cert", SSL_FILETYPE_PEM);
     SSL_CTX_use_PrivateKey_file(ctx, "keys/cnlab.prikey", SSL_FILETYPE_PEM);
-    SSL *ssl = SSL_new(ctx);
+
     while (1) {
         connect = accept(fd, NULL, NULL);
         if (connect = accept(fd, NULL, NULL) == -1) continue;
         else {
             printf("successfully connect socket %d, %d!\n", fd, connect);
+            SSL *ssl = SSL_new(ctx);
             SSL_set_accept_state(ssl);
             SSL_set_fd(ssl, connect);
             if (SSL_accept(ssl) == -1) printf("ssl error!\n");
             /*
                 Receive and Parse Messages.
             */
+            char request[2000];
+            int request_len = SSL_read(ssl, request, 2000);
+            request[request_len] = '\0';
+            printf("\nrequest: (%d)\n", request_len);
+            printf("%s", request);
+            char hdr[50] = "hello";
+            SSL_write(ssl, hdr, strlen(hdr));
+            SSL_shutdown(ssl);
+            SSL_free(ssl);
         }
         close(connect);
     }
@@ -86,7 +96,7 @@ int main () {
     pthread_create(&tid[0], NULL, (void *)http_server, NULL);
     pthread_create(&tid[1], NULL, (void *)https_server, NULL);
     while (1) {
-        
+
     }
     return 0;
 }
