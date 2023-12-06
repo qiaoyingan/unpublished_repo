@@ -35,9 +35,19 @@ void http_server() {
         if (connect = accept(fd, NULL, NULL) == -1) continue;
         else {
             printf("successfully connect socket %d, %d!\n", fd, connect);
-            /*
-                Receive and Parse Messages.
-            */
+            char request[2000];
+            int request_len = recv(connect, request, 2000, 0);
+            request[request_len] = '\0';
+            printf("\nrequest: (%d)\n", request_len);
+            printf("%s", request);
+
+            char buf_cpy[2000];
+            strncpy(buf_cpy,request,2000);
+            // http_request_t req = parse_http_request(buf_cpy);
+            // response
+            char response[2000] = "";
+            sprintf(response,"hello");
+            send(connect, response, strlen(response), 0);
         }
         close(connect);
     }
