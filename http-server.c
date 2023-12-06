@@ -65,7 +65,6 @@ void https_server() {
     SSL_CTX_use_PrivateKey_file(ctx, "keys/cnlab.prikey", SSL_FILETYPE_PEM);
 
     while (1) {
-        connect = accept(fd, NULL, NULL);
         if (connect = accept(fd, NULL, NULL) == -1) continue;
         else {
             printf("successfully connect socket %d, %d!\n", fd, connect);
@@ -92,6 +91,7 @@ void https_server() {
 }
 
 int main () {
+    signal(SIGPIPE, SIG_IGN);
     pthread_t tid[2];
     pthread_create(&tid[0], NULL, (void *)http_server, NULL);
     pthread_create(&tid[1], NULL, (void *)https_server, NULL);
