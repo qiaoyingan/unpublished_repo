@@ -47,6 +47,7 @@ void http_server() {
             // response
             char response[2000] = "";
             sprintf(response,"hello");
+            printf("send response\n")
             send(connect, response, strlen(response), 0);
         }
         close(connect);
