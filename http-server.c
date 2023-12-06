@@ -37,9 +37,10 @@ void http_server() {
             printf("successfully connect socket %d, %d!\n", fd, connect);
             char request[2000];
             int request_len = recv(connect, request, 2000, 0);
-            request[request_len] = '\0';
-            printf("\nrequest: (%d)\n", request_len);
-            printf("%s", request);
+            // request[request_len] = '\0';
+            printf("request: (%d)\n", request_len);
+            printf("%s\n", request);
+            printf("%d\n", strlen(request));
 
             char buf_cpy[2000];
             strncpy(buf_cpy,request,2000);
