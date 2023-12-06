@@ -24,7 +24,7 @@ int init_socket(int port) {
     saddr.sin_port = htons(port);
     saddr.sin_addr.s_addr = INADDR_ANY;
     if (bind(fd, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) printf("bind error of %d!\n", fd);
-    if (listen(fd, 5) < 0) printf("listen error of socket %d!\n", fd);
+    if (listen(fd, 10) < 0) printf("listen error of socket %d!\n", fd);
     printf("successfully init socket %d!\n", fd);
     return fd;
 }
@@ -85,7 +85,8 @@ int main () {
     pthread_t tid[2];
     pthread_create(&tid[0], NULL, (void *)http_server, NULL);
     pthread_create(&tid[1], NULL, (void *)https_server, NULL);
-    pthread_join(tid[0], NULL);
-    pthread_join(tid[1], NULL);
+    while (1) {
+        
+    }
     return 0;
 }
