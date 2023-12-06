@@ -15,6 +15,7 @@
 
 #define HTTP_PORT 80
 #define HTTPS_PORT 443
+#define MAX_LEN 2500
 
 int init_socket(int port) {
     int fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -37,21 +38,16 @@ void http_server() {
             /*
                 todo: Receive and Parse Messages.
             */
-            char request[2000];
-            int request_len = recv(connect, request, 2000, 0);
+            // char request[MAX_LEN];
+            // int request_len = recv(connect, request, MAX_LEN, 0);
             // request[request_len] = '\0';
-            printf("request: (%d)\n", request_len);
-            printf("%s\n", request);
-            printf("%d\n", strlen(request));
-
-            char buf_cpy[2000];
-            strncpy(buf_cpy,request,2000);
-            // http_request_t req = parse_http_request(buf_cpy);
-            // response
-            char response[2000] = "";
-            sprintf(response,"hello");
-            printf("send response\n");
-            send(connect, response, strlen(response), 0);
+            // printf("request: (%d)\n", request_len);
+            // printf("%s\n", request);
+            // printf("%d\n", strlen(request));
+            // char response[MAX_LEN] = "";
+            // sprintf(response,"hello");
+            // printf("send response\n");
+            // send(connect, response, strlen(response), 0);
         }
         close(connect);
     }
@@ -78,12 +74,12 @@ void https_server() {
             /*
                 todo: Receive and Parse Messages.
             */
-            char request[2000];
-            int request_len = SSL_read(ssl, request, 2000);
-            request[request_len] = '\0';
-            printf("\nrequest: (%d)\n", request_len);
-            printf("%s", request);
-            char hdr[50] = "hello";
+            // char request[MAX_LEN];
+            // int request_len = SSL_read(ssl, request, 2000);
+            // request[request_len] = '\0';
+            // printf("\nrequest: (%d)\n", request_len);
+            // printf("%s", request);
+            // char hdr[50] = "hello";
             SSL_write(ssl, hdr, strlen(hdr));
             SSL_shutdown(ssl);
             SSL_free(ssl);
