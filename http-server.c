@@ -38,11 +38,11 @@ void http_server() {
             /*
                 todo: Receive and Parse Messages.
             */
-            // char request[MAX_LEN];
-            // int request_len = recv(connect, request, MAX_LEN, 0);
-            // request[request_len] = '\0';
-            // printf("request: (%d)\n", request_len);
-            // printf("%s\n", request);
+            char request[MAX_LEN];
+            int request_len = recv(connect, request, MAX_LEN, 0);
+            request[request_len] = '\0';
+            printf("request: (%d)\n", request_len);
+            printf("%s\n", request);
             // printf("%d\n", strlen(request));
             // char response[MAX_LEN] = "";
             // sprintf(response,"hello");
@@ -74,13 +74,18 @@ void https_server() {
             /*
                 todo: Receive and Parse Messages.
             */
+            char request[MAX_LEN];
+            int request_len = recv(connect, request, MAX_LEN, 0);
+            request[request_len] = '\0';
+            printf("request: (%d)\n", request_len);
+            printf("%s\n", request);
             // char request[MAX_LEN];
             // int request_len = SSL_read(ssl, request, 2000);
             // request[request_len] = '\0';
             // printf("\nrequest: (%d)\n", request_len);
             // printf("%s", request);
             // char hdr[50] = "hello";
-            SSL_write(ssl, hdr, strlen(hdr));
+            // SSL_write(ssl, hdr, strlen(hdr));
             SSL_shutdown(ssl);
             SSL_free(ssl);
         }
