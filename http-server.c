@@ -34,31 +34,31 @@ struct request read_request(const char* buffer, int length) {
     int start = 0;
     for (int i = 0; i < length; i++) {
         if (buffer[i] == ' ' && _method) {
-            memcpy(req.method, buffer, i - 1);
-            req.method[i - 1] = '\0';
+            memcpy(req.method, buffer, i);
+            req.method[i] = '\0';
             _method = 0;
             _path = 1;
             start = i + 1;
         }
         else if (buffer[i] == ' ' && _path) {
-            memcpy(req.path, buffer + start, i - 1 - start);
-            req.path[i - 1] = '\0';
+            memcpy(req.path, buffer + start, i - start);
+            req.path[i - start] = '\0';
             _path = 0;
         } else {
             if (buffer[i] == '\n') {
                 if (_host) {
-                    memcpy(req.host, buffer + start, i - 1 - start);
-                    if (req.host[i - 2 - start] == '\r')
-                        req.host[i - 2 - start] = '\0';
-                    else
+                    memcpy(req.host, buffer + start, i - start);
+                    if (req.host[i - 1 - start] == '\r')
                         req.host[i - 1 - start] = '\0';
+                    else
+                        req.host[i - start] = '\0';
                 }
                 start = i + 1;
                 _key = 1;
             } else if (buffer[i] == ':' && _key) {
                 char name[REQ_MAX_LEN];
-                memcpy(name, buffer + start, i - 1 - start);
-                name[i - 1 - start] = '\0';
+                memcpy(name, buffer + start, i - start);
+                name[i - start] = '\0';
                 if (strcmp(name, "Host") == 0) _host = 1;
                 start = i + 2;
             } 
