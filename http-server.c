@@ -24,8 +24,8 @@ struct request {
     char method[METHOD_MAX_LEN];
     char path[PATH_MAX_LEN];
     char host[HOST_MAX_LEN];
-    int start = 0;
-    int end = 0;
+    int start;
+    int end;
 };
 
 struct request read_request(const char* buffer, int length) {
@@ -44,7 +44,6 @@ struct request read_request(const char* buffer, int length) {
             memcpy(req.path, buffer + start, i - 1 - start);
             req.path[i - 1] = '\0';
             _path = 0;
-            _value = 1;
         } else {
             if (buffer[i] == '\n') {
                 if (_host) {
@@ -92,7 +91,7 @@ void http_server() {
             char buffer[REQ_MAX_LEN];
             int length = recv(connect, buffer, REQ_MAX_LEN, 0);
             printf("request: (%d)\n", length);
-            printf("%s\nParse Result:\n", request);
+            printf("%s\nParse Result:\n", buffer);
             struct request req = read_request(buffer, length);
             printf("method : %s\n", req.method);
             printf("path : %s\n", req.path);
