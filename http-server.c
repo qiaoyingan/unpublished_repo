@@ -59,6 +59,7 @@ struct request read_request(const char* buffer, int length) {
                 char name[REQ_MAX_LEN];
                 memcpy(name, buffer + start, i - start);
                 name[i - start] = '\0';
+                printf("name : %s", name);
                 if (strcmp(name, "Host") == 0) _host = 1;
                 start = i + 2;
             } 
