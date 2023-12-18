@@ -64,7 +64,7 @@ struct request read_request(const char* buffer, int length) {
             } 
         }
     }
-
+    return req;
 }
 
 int init_socket(int port) {
