@@ -1,9 +1,12 @@
 import requests
+import time
 from os.path import dirname, realpath
 
 requests.packages.urllib3.disable_warnings()
 
 test_dir = dirname(realpath(__file__))
+
+time.sleep(10)
 
 # http 301
 r = requests.get('http://10.0.0.1/index.html', allow_redirects=False)
