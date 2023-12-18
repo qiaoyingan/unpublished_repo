@@ -24,26 +24,27 @@ struct request {
     char method[METHOD_MAX_LEN];
     char path[PATH_MAX_LEN];
     char host[HOST_MAX_LEN];
-    int start = 0, end = 0;
+    int start = 0;
+    int end = 0;
 };
 
 struct request read_request(const char* buffer, int length) {
     struct request req;
-    bool _method = true, _path = false, _key = false, _host = false;
+    int _method = 1, _path = 0, _key = 0, _host = 0;
     int start = 0;
     for (int i = 0; i < length; i++) {
         if (buffer[i] == ' ' && _method) {
             memcpy(req.method, buffer, i - 1);
             req.method[i - 1] = '\0';
-            _method = false;
-            _path = true;
+            _method = 0;
+            _path = 1;
             start = i + 1;
         }
         else if (buffer[i] == ' ' && _path) {
             memcpy(req.path, buffer + start, i - 1 - start);
             req.path[i - 1] = '\0';
-            _path = false;
-            _value = true;
+            _path = 0;
+            _value = 1;
         } else {
             if (buffer[i] == '\n') {
                 if (_host) {
@@ -54,12 +55,12 @@ struct request read_request(const char* buffer, int length) {
                         req.host[i - 1 - start] = '\0';
                 }
                 start = i + 1;
-                _key = true;
+                _key = 1;
             } else if (buffer[i] == ':' && _key) {
                 char name[REQ_MAX_LEN];
                 memcpy(name, buffer + start, i - 1 - start);
                 name[i - 1 - start] = '\0';
-                if (strcmp(name, "Host") == 0) _host = true;
+                if (strcmp(name, "Host") == 0) _host = 1;
                 start = i + 2;
             } 
         }
@@ -127,8 +128,8 @@ void https_server() {
             /*
                 todo: Receive and Parse Messages.
             */
-            char request[MAX_LEN];
-            int request_len = recv(connect, request, MAX_LEN, 0);
+            char request[REQ_MAX_LEN];
+            int request_len = recv(connect, request, REQ_MAX_LEN, 0);
             request[request_len] = '\0';
             printf("request: (%d)\n", request_len);
             printf("%s\n", request);
