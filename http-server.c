@@ -15,7 +15,57 @@
 
 #define HTTP_PORT 80
 #define HTTPS_PORT 443
-#define MAX_LEN 2500
+#define REQ_MAX_LEN 2500
+#define METHOD_MAX_LEN 16
+#define PATH_MAX_LEN 128
+#define HOST_MAX_LEN 32
+
+struct request {
+    char method[METHOD_MAX_LEN];
+    char path[PATH_MAX_LEN];
+    char host[HOST_MAX_LEN];
+    int start = 0, end = 0;
+};
+
+struct request read_request(const char* buffer, int length) {
+    struct request req;
+    bool _method = true, _path = false, _key = false, _host = false;
+    int start = 0;
+    for (int i = 0; i < length; i++) {
+        if (buffer[i] == ' ' && _method) {
+            memcpy(req.method, buffer, i - 1);
+            req.method[i - 1] = '\0';
+            _method = false;
+            _path = true;
+            start = i + 1;
+        }
+        else if (buffer[i] == ' ' && _path) {
+            memcpy(req.path, buffer + start, i - 1 - start);
+            req.path[i - 1] = '\0';
+            _path = false;
+            _value = true;
+        } else {
+            if (buffer[i] == '\n') {
+                if (_host) {
+                    memcpy(req.host, buffer + start, i - 1 - start);
+                    if (req.host[i - 2 - start] == '\r')
+                        req.host[i - 2 - start] = '\0';
+                    else
+                        req.host[i - 1 - start] = '\0';
+                }
+                start = i + 1;
+                _key = true;
+            } else if (buffer[i] == ':' && _key) {
+                char name[REQ_MAX_LEN];
+                memcpy(name, buffer + start, i - 1 - start);
+                name[i - 1 - start] = '\0';
+                if (strcmp(name, "Host") == 0) _host = true;
+                start = i + 2;
+            } 
+        }
+    }
+
+}
 
 int init_socket(int port) {
     int fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -38,16 +88,19 @@ void http_server() {
             /*
                 todo: Receive and Parse Messages.
             */
-            char request[MAX_LEN];
-            int request_len = recv(connect, request, MAX_LEN, 0);
-            request[request_len] = '\0';
-            printf("request: (%d)\n", request_len);
-            printf("%s\n", request);
-            // printf("%d\n", strlen(request));
-            // char response[MAX_LEN] = "";
-            // sprintf(response,"hello");
-            // printf("send response\n");
-            // send(connect, response, strlen(response), 0);
+            char buffer[REQ_MAX_LEN];
+            int length = recv(connect, buffer, REQ_MAX_LEN, 0);
+            printf("request: (%d)\n", length);
+            printf("%s\nParse Result:\n", request);
+            struct request req = read_request(buffer, length);
+            printf("method : %s\n", req.method);
+            printf("path : %s\n", req.path);
+            printf("host : %s\n", req.host);
+            // printf("method : %s\n", req.method);
+
+            
+
+            
         }
         close(connect);
     }
