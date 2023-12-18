@@ -47,6 +47,7 @@ struct request read_request(const char* buffer, int length) {
         } else {
             if (buffer[i] == '\n') {
                 if (_host) {
+                    printf("ok!");
                     memcpy(req.host, buffer + start, i - start);
                     if (req.host[i - 1 - start] == '\r')
                         req.host[i - 1 - start] = '\0';
@@ -60,7 +61,7 @@ struct request read_request(const char* buffer, int length) {
                 memcpy(name, buffer + start, i - start);
                 name[i - start] = '\0';
                 printf("name : %s", name);
-                if (strcmp(name, "Host") == 0) _host = 1;
+                if (strcmp(name, "Host") == 0) { _host = 1; printf("matched!") }
                 start = i + 2;
             } 
         }
